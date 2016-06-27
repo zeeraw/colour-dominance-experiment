@@ -40,48 +40,44 @@ export default class ColorDominanceCalculator {
     this.colorBuckets = new Array(Math.pow(this.colorDensity, 3)).fill(0)
     this.smootheningBuckets = new Array(Math.pow(this.colorDensity, 3)).fill(0)
 
-    var length = imageData.data.length
-
+    // Create a color map matrix with the same aspect ratio as the image
     let sqr = Math.sqrt(this.granularity)
     let mapX = Math.floor(sqr * imageData.width / imageData.height)
     let mapY = Math.floor(sqr * imageData.height / imageData.width)
 
-    // Create a color map of x and y coordinates
-    for (let y = 0; y < 1; y += 1 / mapY) {
-      for (let x = 0; x < 1; x += 1 / mapX) {
+    for (let y = 0; y < 1; y += 1 / mapY)
+    for (let x = 0; x < 1; x += 1 / mapX) {
 
-        // Translate map pixel coordinates to actual image pixel coordinates
-        let xx = Math.floor(x * imageData.width)
-        let yy = Math.floor(y * imageData.height)
+      // Translate map pixel coordinates to actual image pixel coordinates
+      let xx = Math.floor(x * imageData.width)
+      let yy = Math.floor(y * imageData.height)
 
-        // Extrapolate r, g and b values from the x and y coordinates
-        let r = imageData.data[(imageData.width * yy + xx) * 4]
-        let g = imageData.data[(imageData.width * yy + xx) * 4 + 1]
-        let b = imageData.data[(imageData.width * yy + xx) * 4 + 2]
+      // Extrapolate r, g and b values from the x and y coordinates
+      let r = imageData.data[(imageData.width * yy + xx) * 4]
+      let g = imageData.data[(imageData.width * yy + xx) * 4 + 1]
+      let b = imageData.data[(imageData.width * yy + xx) * 4 + 2]
 
-        let [h, s, l] = this.rgbToHsl(r, g, b)
+      let [h, s, l] = this.rgbToHsl(r, g, b)
 
-        // Avoid colors that are too dark, bright or saturated
-        let tooWhite = (r < this.minIntensity && g < this.minIntensity && b < this.minIntensity)
-        let tooBlack = (r > this.maxIntensity && g > this.maxIntensity && b > this.maxIntensity)
+      // Avoid colors that are too dark, bright or saturated
+      let tooWhite = (r < this.minIntensity && g < this.minIntensity && b < this.minIntensity)
+      let tooBlack = (r > this.maxIntensity && g > this.maxIntensity && b > this.maxIntensity)
 
+      // Add color to bucket if inside the chromatic value constraints
+      // if (!(tooBright || tooDark)) {
+      if (!(tooWhite || tooBlack)) {
+        this.addToBucket(r, g, b)
+
+        // Amplify color by adding it to the bucket again if within saturation and brightness constraints
         let tooBright = (l < this.minLuminosity)
         let tooDark = (l > this.maxLuminosity)
 
         let tooSaturated = (s < this.minSaturation)
         let tooUnsaturated = (s > this.maxSaturation)
 
-        // Add color to bucket if inside the chromatic value constraints
-        // if (!(tooBright || tooDark)) {
-        if (!(tooWhite || tooBlack)) {
+        if (!(tooBright || tooDark || tooSaturated || tooUnsaturated)) {
           this.addToBucket(r, g, b)
-
-          // Amplify color by adding it to the bucket again if within saturation and brightness constraints
-          if (!(tooBright || tooDark || tooSaturated || tooUnsaturated)) {
-            this.addToBucket(r, g, b)
-          }
         }
-
       }
     }
 
@@ -89,25 +85,23 @@ export default class ColorDominanceCalculator {
     for (let pass = 0; pass < this.blurPasses; pass++) {
 
       // Iterate over all colors in the bit map
-      for (let b = 0; b < this.colorDensity; b++) {
-        for (let g = 0; g < this.colorDensity; g++) {
-          for (let r = 0; r < this.colorDensity; r++) {
-            let index = b * Math.pow(this.colorDensity, 2) + g * this.colorDensity + r
+      for (let b = 0; b < this.colorDensity; b++)
+      for (let g = 0; g < this.colorDensity; g++)
+      for (let r = 0; r < this.colorDensity; r++) {
+        let index = b * Math.pow(this.colorDensity, 2) + g * this.colorDensity + r
 
-            let total = this.getAtPoint(r + 0, g + 0, b + 0)
-            total += this.getAtPoint(r + 1, g + 1, b + 1) * this.blurValue
-            total += this.getAtPoint(r + 1, g + 1, b - 1) * this.blurValue
-            total += this.getAtPoint(r + 1, g - 1, b + 1) * this.blurValue
-            total += this.getAtPoint(r + 1, g - 1, b - 1) * this.blurValue
-            total += this.getAtPoint(r - 1, g + 1, b + 1) * this.blurValue
-            total += this.getAtPoint(r - 1, g + 1, b - 1) * this.blurValue
-            total += this.getAtPoint(r - 1, g - 1, b + 1) * this.blurValue
-            total += this.getAtPoint(r - 1, g - 1, b - 1) * this.blurValue
+        let total = this.getAtPoint(r + 0, g + 0, b + 0)
+        total += this.getAtPoint(r + 1, g + 1, b + 1) * this.blurValue
+        total += this.getAtPoint(r + 1, g + 1, b - 1) * this.blurValue
+        total += this.getAtPoint(r + 1, g - 1, b + 1) * this.blurValue
+        total += this.getAtPoint(r + 1, g - 1, b - 1) * this.blurValue
+        total += this.getAtPoint(r - 1, g + 1, b + 1) * this.blurValue
+        total += this.getAtPoint(r - 1, g + 1, b - 1) * this.blurValue
+        total += this.getAtPoint(r - 1, g - 1, b + 1) * this.blurValue
+        total += this.getAtPoint(r - 1, g - 1, b - 1) * this.blurValue
 
-            // Divide the total by the total of all coefficients
-            this.smootheningBuckets[index] = total /= (8 * this.blurValue + 1)
-          }
-        }
+        // Divide the total by the total of all coefficients
+        this.smootheningBuckets[index] = total /= (8 * this.blurValue + 1)
       }
 
       // Replace the regular bucket with the smoothened one
