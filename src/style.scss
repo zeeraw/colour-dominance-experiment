@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+  font-family: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", sans-serif;
+  background: #FBFBFB;
+}
+
+.images {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.image {
+  float: left;
+  flex: 2 15%;
+}
+
+.image img {
+  max-width: 80%;
+  margin: 10%;
+}
+
+.image p {
+  text-align: center;
+  padding: 5px;
+  margin-bottom: 0;
+  &.tertiary {
+    margin-top: 0;
+  }
+}

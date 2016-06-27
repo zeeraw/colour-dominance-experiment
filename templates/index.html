@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+  </head>
+
+  <body>
+    <div class="images">
+      <% for (let idx of [...Array(15).keys()]) { %>
+        <div class="image">
+          <p class="secondary">Secondary</p>
+          <p class="tertiary">Tertiary</p>
+          <img src="img/<%= idx + 1 %>.jpg">
+        </div>
+      <% } %>
+    </div>
+    <script src="http://127.0.0.1:35729/livereload.js?snipver=1"></script>
+    <script type="text/javascript" src="main.js"></script>
+  </body>
+</html>
