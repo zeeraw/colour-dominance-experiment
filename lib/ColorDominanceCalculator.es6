@@ -38,7 +38,7 @@ export default class ColorDominanceCalculator {
 
   calculate(imageData) {
     this.colorBuckets = new Array(Math.pow(this.colorDensity, 3)).fill(0)
-    this.smootheningBuckets = new Array(Math.pow(this.colorDensity, 3)).fill(0)
+    this.blurBuckets = new Array(Math.pow(this.colorDensity, 3)).fill(0)
 
     // Create a color map matrix with the same aspect ratio as the image
     let sqr = Math.sqrt(this.granularity)
@@ -101,12 +101,12 @@ export default class ColorDominanceCalculator {
         total += this.getAtPoint(r - 1, g - 1, b - 1) * this.blurValue
 
         // Divide the total by the total of all coefficients
-        this.smootheningBuckets[index] = total /= (8 * this.blurValue + 1)
+        this.blurBuckets[index] = total /= (8 * this.blurValue + 1)
       }
 
       // Replace the regular bucket with the smoothened one
       for (let i = 0; i < Math.pow(this.colorDensity, 3); i++ ) {
-        this.colorBuckets[i] = this.smootheningBuckets[i]
+        this.colorBuckets[i] = this.blurBuckets[i]
       }
     }
 
