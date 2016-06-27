@@ -55,7 +55,7 @@ const WEBPACK_OPTS = {
 }
 
 const PATHS = {
-  js: ["src/main.es6"],
+  js: ["src/main.es6", "lib/**/*.es6"],
   css: ["src/style.scss"],
   img: ["images/**"],
 }
