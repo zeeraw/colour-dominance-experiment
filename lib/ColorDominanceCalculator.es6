@@ -64,7 +64,6 @@ export default class ColorDominanceCalculator {
       let tooBlack = (r > this.maxIntensity && g > this.maxIntensity && b > this.maxIntensity)
 
       // Add color to bucket if inside the chromatic value constraints
-      // if (!(tooBright || tooDark)) {
       if (!(tooWhite || tooBlack)) {
         this.addToBucket(r, g, b)
 
